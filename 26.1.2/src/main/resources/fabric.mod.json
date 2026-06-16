@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "plexmod",
+  "version": "${version}",
+  "name": "PlexMod",
+  "description": "A handful of QoL client-side tweaks for Mineplex.",
+  "authors": ["Nathan (Mubioh)"],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/plexmod",
+    "issues": "https://discord.gg/e9eYkQAUg"
+  },
+  "license": "MIT",
+  "icon": "assets/plexmod/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "me.mubioh.plexmod.client.PlexModClient"
+    ]
+  },
+  "mixins": [
+    "plexmod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

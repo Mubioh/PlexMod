@@ -1,0 +1,104 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "https://maven.minecraftforge.net/net/minecraftforge/gradle/"
+        }
+        maven {
+            name = "sponge"
+            url = "https://repo.spongepowered.org/repository/maven-public/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'org.spongepowered.mixin'
+
+version = "1.0.0"
+group = "me.mubioh.plexmod"
+archivesBaseName = "plexmod-mc1.8.9"
+
+mixin {
+    add sourceSets.main, "plexmod.refmap.json"
+}
+
+minecraft {
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable_20"
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// Set up a custom configuration for shading dependencies
+configurations {
+    embed
+    compile.extendsFrom embed
+}
+
+repositories {
+    jcenter()
+    maven {
+        name = "sponge"
+        url = "https://repo.spongepowered.org/repository/maven-public/"
+    }
+}
+
+dependencies {
+    // Put Mixin and DiscordIPC into 'embed' so they get safely shaded
+    embed('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+        exclude module: 'launchwrapper'
+        exclude module: 'guava'
+        exclude module: 'gson'
+        exclude module: 'commons-io'
+        exclude module: 'log4j'
+    }
+
+    embed "com.jagrosh:DiscordIPC:0.4"
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+jar {
+    // This safely embeds the files from the 'embed' configuration
+    from {
+        configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+
+    manifest {
+        attributes(
+                'MixinConfigs': 'plexmod.mixins.json',
+                'FMLCorePluginContainsFMLMod': 'true',
+                'FMLCorePlugin': 'me.mubioh.plexmod.asm.PlexCoreMod',
+                // This forces Forge to prioritize injecting your jar into the ClassLoader
+                // before trying to initialize your FMLCorePlugin class.
+                'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+                'ForceLoadAsMod': 'true'
+        )
+    }
+}

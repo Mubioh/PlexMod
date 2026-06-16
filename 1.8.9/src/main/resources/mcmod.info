@@ -1,0 +1,15 @@
+[
+  {
+    "modid"      : "plexmod",
+    "name"       : "PlexMod",
+    "description": "A handful of QoL client-side tweaks for Mineplex.",
+    "version"    : "${version}",
+    "mcversion"  : "${mcversion}",
+    "url"        : "https://modrinth.com/mod/plexmod",
+    "authorList" : ["Nathan (Mubioh)"],
+    "credits"    : "",
+    "logoFile"   : "assets/plexmod/icon.png",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
