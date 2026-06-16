@@ -52,4 +52,6 @@ Found a bug or want to request a feature? [Join the Discord!](https://discord.gg
 
 ## Notes
 
-The Forge 1.8.9 port was partially AI-assisted to speed up development due to the significant platform differences between 1.8.9 Forge and modern Fabric. All AI-generated code was fixed up if something didn't work, otherwise it was left as is.
+The Forge 1.8.9 port was partially AI-assisted to speed up development due to the significant platform differences between 1.8.9 Forge and modern Fabric.
+
+All AI-generated code was fixed up if something didn't work, otherwise it was left as is.
