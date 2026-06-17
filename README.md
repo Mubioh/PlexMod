@@ -13,7 +13,11 @@ PlexMod is a client mod for Minecraft that adds a handful of QoL tweaks for Mine
 
 **Supports:**
 - Forge 1.8.9
-- Fabric 26.1.2
+- Fabric 26.1.2 (Latest)
+
+**Maintenance:**
+- **Active Support:** Forge 1.8.9 and the latest Minecraft release receive all new features and updates.
+- **Legacy Support:** Older releases remain available but may only receive bug fixes.
 
 ---
 
