@@ -1,0 +1,12 @@
+{
+  "autoGgEnabled": true,
+  "autoGlEnabled": true,
+  "autoTauntEnabled": false,
+  "autoFriendEnabled": true,
+  "discordRpcEnabled": true,
+  "chatCycleEnabled": true,
+  "nametagEnabled": true,
+  "betterLobbiesEnabled": true,
+  "autoGgMessage": "GG!",
+  "autoGlMessage": "GL HF!"
+}
