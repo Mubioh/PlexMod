@@ -13,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState> {
+
+    // Shows the local player's own nametag when in third-person view.
     @Inject(
             method = "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z",
             at = @At("HEAD"),
@@ -26,8 +28,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         if (localPlayer == null || entity != localPlayer) return;
 
         boolean thirdPerson = !mc.options.getCameraType().isFirstPerson();
-        boolean hudVisible = !mc.gui.hud.isHidden();
-        boolean visible = !entity.isInvisibleTo(localPlayer);
+        boolean hudVisible  = !mc.gui.hud.isHidden();
+        boolean visible     = !entity.isInvisibleTo(localPlayer);
 
         if (thirdPerson && hudVisible && visible && !entity.isVehicle()) {
             cir.setReturnValue(true);

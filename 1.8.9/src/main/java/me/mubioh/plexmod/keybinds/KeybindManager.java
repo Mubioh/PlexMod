@@ -1,6 +1,7 @@
 package me.mubioh.plexmod.keybinds;
 
-import me.mubioh.plexmod.screen.PlexScreen;
+import me.mubioh.plexmod.feature.chatcycle.ChatCycleFeature;
+import me.mubioh.plexmod.screen.PlexHudScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -14,12 +15,13 @@ public class KeybindManager {
 
     private static final String CATEGORY = "key.category.mineplexmod";
 
+    /** K — opens the new custom HUD screen */
     public static KeyBinding openMenu;
 
     private KeybindManager() {}
 
     public static void register() {
-        openMenu  = new KeyBinding("key.mineplexmod.open_menu",   Keyboard.KEY_K,   CATEGORY);
+        openMenu       = new KeyBinding("key.mineplexmod.open_menu",        Keyboard.KEY_K,      CATEGORY);
         ClientRegistry.registerKeyBinding(openMenu);
     }
 
@@ -27,9 +29,14 @@ public class KeybindManager {
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getMinecraft();
+
+        // Drive ChatCycle team-game detection
+        ChatCycleFeature chatCycle = ChatCycleFeature.getInstance();
+        if (chatCycle != null) chatCycle.onClientTick();
+
         while (openMenu.isPressed()) {
-            if (mc.currentScreen instanceof PlexScreen) return;
-            mc.displayGuiScreen(new PlexScreen(mc.currentScreen));
+            if (mc.currentScreen instanceof PlexHudScreen) return;
+            mc.displayGuiScreen(new PlexHudScreen(mc.currentScreen));
         }
     }
 }

@@ -4,6 +4,7 @@ import me.mubioh.plexmod.core.chat.ChatChannel;
 import me.mubioh.plexmod.feature.chatcycle.ChatCycleFeature;
 import me.mubioh.plexmod.feature.chatcycle.ChatCycleHudRenderer;
 import me.mubioh.plexmod.feature.chatcycle.DmChannel;
+import me.mubioh.plexmod.feature.community.CommunityChannel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
@@ -24,8 +25,8 @@ public class ChatScreenMixin {
 
     @Shadow protected EditBox input;
 
-    @Unique private long plexmod$lastTabClickTime = 0;
-    @Unique private Object plexmod$lastTabClicked = null;
+    @Unique private long   plexmod$lastTabClickTime = 0;
+    @Unique private Object plexmod$lastTabClicked   = null;
 
     private static final long DOUBLE_CLICK_MS = 400;
 
@@ -77,8 +78,13 @@ public class ChatScreenMixin {
         int mx   = (int) event.x();
         int my   = (int) event.y();
 
+        CommunityChannel commChannel = feature.getCommunityChannel();
+
         ChatChannel clickedFixed = ChatCycleHudRenderer.getClickedFixedTab(
-                mx, my, tabX, tabY, feature.isInParty(), feature.isInTeamGame());
+                mx, my, tabX, tabY,
+                feature.isInParty(), feature.isInTeamGamePublic(),
+                feature.isInCommunity(), commChannel);
+
         if (clickedFixed != null) {
             long now = System.currentTimeMillis();
             boolean isDoubleClick = clickedFixed == plexmod$lastTabClicked
@@ -91,7 +97,11 @@ public class ChatScreenMixin {
         }
 
         DmChannel clickedDm = ChatCycleHudRenderer.getClickedDmTab(
-                mx, my, tabX, tabY, feature.isInParty(), feature.isInTeamGame(), feature.getDmChannels());
+                mx, my, tabX, tabY,
+                feature.isInParty(), feature.isInTeamGamePublic(),
+                feature.isInCommunity(), commChannel,
+                feature.getDmChannels());
+
         if (clickedDm != null) {
             long now = System.currentTimeMillis();
             boolean isDoubleClick = clickedDm == plexmod$lastTabClicked
@@ -117,7 +127,10 @@ public class ChatScreenMixin {
                 feature.getCurrentDmChannel(),
                 feature.getPinnedDmChannel(),
                 feature.getDmChannels(),
-                feature.isInParty(), feature.isInTeamGame(),
+                feature.getCommunityChannel(),
+                feature.isInParty(),
+                feature.isInTeamGamePublic(),
+                feature.isInCommunity(),
                 mouseX, mouseY
         );
     }

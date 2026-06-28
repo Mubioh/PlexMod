@@ -1,5 +1,6 @@
 package me.mubioh.plexmod.mixin;
 
+import me.mubioh.plexmod.core.config.PlexConfig;
 import me.mubioh.plexmod.core.util.GameDetectorUtil;
 import me.mubioh.plexmod.feature.betterlobbies.BetterLobbiesFeature;
 import net.minecraft.client.Minecraft;
@@ -32,10 +33,11 @@ public abstract class MixinGuiIngame extends Gui {
     @Inject(method = "renderScoreboard", at = @At("HEAD"), cancellable = true)
     private void onRenderScoreboard(ScoreObjective objective, ScaledResolution resolution, CallbackInfo ci) {
         ci.cancel();
-        drawScoreboardWithoutNumbers(objective, resolution);
+        boolean showRed = PlexConfig.getInstance().isFeatureEnabled("scoreboard_red");
+        drawScoreboard(objective, resolution, showRed);
     }
 
-    private void drawScoreboardWithoutNumbers(ScoreObjective objective, ScaledResolution resolution) {
+    private void drawScoreboard(ScoreObjective objective, ScaledResolution resolution, boolean showNumbers) {
         Minecraft mc = Minecraft.getMinecraft();
         FontRenderer fr = mc.fontRendererObj;
         Scoreboard scoreboard = objective.getScoreboard();
@@ -48,6 +50,7 @@ public abstract class MixinGuiIngame extends Gui {
             }
         }
 
+        // Always measure width WITH numbers so the board never shrinks
         int width = fr.getStringWidth(objective.getDisplayName());
         for (Score score : scores) {
             ScorePlayerTeam team = scoreboard.getPlayersTeam(score.getPlayerName());
@@ -58,9 +61,9 @@ public abstract class MixinGuiIngame extends Gui {
 
         int sidebarX = resolution.getScaledWidth() - width - 3;
         int sidebarY = (resolution.getScaledHeight() + scores.size() * fr.FONT_HEIGHT) / 2;
-        int scoreX = sidebarX + width + 1;
-        int bgColor = 0x44000000;
-        int headerColor = 0x66000000;
+        int scoreX   = sidebarX + width + 1;
+        int bgColor  = 0x44000000;
+        int hdrColor = 0x66000000;
 
         int index = 0;
         for (Score score : scores) {
@@ -72,9 +75,14 @@ public abstract class MixinGuiIngame extends Gui {
             drawRect(sidebarX - 2, y, scoreX, y + fr.FONT_HEIGHT, bgColor);
             fr.drawString(line, sidebarX, y, 0xFFFFFF);
 
+            if (showNumbers) {
+                String numStr = " " + score.getScorePoints();
+                fr.drawString(numStr, sidebarX + width - fr.getStringWidth(numStr) + 1, y, 0xFF5555);
+            }
+
             if (index == scores.size()) {
                 String title = objective.getDisplayName();
-                drawRect(sidebarX - 2, y - fr.FONT_HEIGHT - 1, scoreX, y - 1, headerColor);
+                drawRect(sidebarX - 2, y - fr.FONT_HEIGHT - 1, scoreX, y - 1, hdrColor);
                 drawRect(sidebarX - 2, y - 1, scoreX, y, bgColor);
                 fr.drawString(title,
                         sidebarX + (width - fr.getStringWidth(title)) / 2,

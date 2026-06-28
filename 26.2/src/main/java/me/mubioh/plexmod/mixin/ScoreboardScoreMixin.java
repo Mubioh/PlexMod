@@ -1,5 +1,6 @@
 package me.mubioh.plexmod.mixin;
 
+import me.mubioh.plexmod.core.config.PlexConfig;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -21,8 +22,12 @@ public class ScoreboardScoreMixin {
     private void suppressScoreNumbers(GuiGraphicsExtractor graphics, Font font,
                                       Component text, int x, int y, int color, boolean shadow) {
         String plain = text.getString().trim();
-        if (!plain.matches("-?\\d+")) {
-            graphics.text(font, text, x, y, color, shadow);
+
+        // If the text is a raw number and the scoreboard-red toggle is off, suppress it
+        if (plain.matches("-?\\d+") && !PlexConfig.getInstance().isFeatureEnabled("scoreboard_red")) {
+            return;
         }
+
+        graphics.text(font, text, x, y, color, shadow);
     }
 }

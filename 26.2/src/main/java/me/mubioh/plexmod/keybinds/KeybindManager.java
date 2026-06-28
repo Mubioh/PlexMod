@@ -1,7 +1,7 @@
 package me.mubioh.plexmod.keybinds;
 
 import me.mubioh.plexmod.mixin.KeyMappingCategoryAccessor;
-import me.mubioh.plexmod.screen.PlexScreen;
+import me.mubioh.plexmod.screen.PlexHudScreen;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
@@ -16,6 +16,7 @@ public class KeybindManager {
     private static final KeyMapping.Category CATEGORY =
             KeyMapping.Category.register(Identifier.parse("mineplexmod"));
 
+    /** K — opens the new custom HUD screen */
     public static KeyMapping openMenu;
 
     public static void register() {
@@ -32,15 +33,14 @@ public class KeybindManager {
 
     private static void moveMineplexCategoryToTop() {
         List<KeyMapping.Category> sortOrder = KeyMappingCategoryAccessor.mineplexmod$getSortOrder();
-
         sortOrder.remove(CATEGORY);
         sortOrder.add(0, CATEGORY);
     }
 
     private static void onTick(Minecraft client) {
         while (openMenu.consumeClick()) {
-            if (client.gui.screen() instanceof PlexScreen) return;
-            client.gui.setScreen(new PlexScreen(client.gui.screen()));
+            if (client.gui.screen() instanceof PlexHudScreen) return;
+            client.gui.setScreen(new PlexHudScreen(client.gui.screen()));
         }
     }
 }

@@ -27,7 +27,11 @@ public class PlexConfig {
     private boolean discordRpcEnabled    = true;
     private boolean chatCycleEnabled     = true;
     private boolean nametagEnabled       = true;
+    private boolean playerTagEnabled     = true;
     private boolean betterLobbiesEnabled = true;
+    private boolean scoreboardRedEnabled = true;
+    private boolean communityChatEnabled = true;
+    private String  nametagExtraTag      = "NONE";
     private String  autoGgMessage        = "GG!";
     private String  autoGlMessage        = "GL HF!";
 
@@ -51,12 +55,16 @@ public class PlexConfig {
             discordRpcEnabled    = bool(j, "discordRpcEnabled",    true);
             chatCycleEnabled     = bool(j, "chatCycleEnabled",     true);
             nametagEnabled       = bool(j, "nametagEnabled",       true);
+            playerTagEnabled     = bool(j, "playerTagEnabled",     true);
             betterLobbiesEnabled = bool(j, "betterLobbiesEnabled", true);
+            scoreboardRedEnabled = bool(j, "scoreboardRedEnabled", true);
+            communityChatEnabled = bool(j, "communityChatEnabled", true);
+            nametagExtraTag      = str(j,  "nametagExtraTag",      "NONE");
             autoGgMessage        = str(j,  "autoGgMessage",        "GG!");
             autoGlMessage        = str(j,  "autoGlMessage",        "GL HF!");
             LOGGER.info("[PlexMod] Config loaded.");
         } catch (Exception e) {
-            LOGGER.error("[PlexMod] Failed to load config, using defaults: {}", e.getMessage());
+            LOGGER.error("[PlexMod] Failed to load config: {}", e.getMessage());
         }
     }
 
@@ -69,7 +77,11 @@ public class PlexConfig {
         j.addProperty("discordRpcEnabled",    discordRpcEnabled);
         j.addProperty("chatCycleEnabled",     chatCycleEnabled);
         j.addProperty("nametagEnabled",       nametagEnabled);
+        j.addProperty("playerTagEnabled",     playerTagEnabled);
         j.addProperty("betterLobbiesEnabled", betterLobbiesEnabled);
+        j.addProperty("scoreboardRedEnabled", scoreboardRedEnabled);
+        j.addProperty("communityChatEnabled", communityChatEnabled);
+        j.addProperty("nametagExtraTag",      nametagExtraTag);
         j.addProperty("autoGgMessage",        autoGgMessage);
         j.addProperty("autoGlMessage",        autoGlMessage);
         try (Writer w = new OutputStreamWriter(new FileOutputStream(getConfigFile()), StandardCharsets.UTF_8)) {
@@ -80,38 +92,53 @@ public class PlexConfig {
     }
 
     public boolean isFeatureEnabled(String id) {
-        switch (id) {
-            case "autogg":         return autoGgEnabled;
-            case "autogl":         return autoGlEnabled;
-            case "autotaunt":      return autoTauntEnabled;
-            case "autofriend":     return autoFriendEnabled;
-            case "discord_rpc":    return discordRpcEnabled;
-            case "chat_cycle":     return chatCycleEnabled;
-            case "nametag":        return nametagEnabled;
-            case "better_lobbies": return betterLobbiesEnabled;
-            default: LOGGER.warn("[PlexMod] Unknown feature: {}", id); return false;
-        }
+        if ("autogg".equals(id))         return autoGgEnabled;
+        if ("autogl".equals(id))         return autoGlEnabled;
+        if ("autotaunt".equals(id))      return autoTauntEnabled;
+        if ("autofriend".equals(id))     return autoFriendEnabled;
+        if ("discord_rpc".equals(id))    return discordRpcEnabled;
+        if ("chat_cycle".equals(id))     return chatCycleEnabled;
+        if ("nametag".equals(id))        return nametagEnabled;
+        if ("player_tag".equals(id))     return playerTagEnabled;
+        if ("better_lobbies".equals(id)) return betterLobbiesEnabled;
+        if ("scoreboard_red".equals(id)) return scoreboardRedEnabled;
+        if ("community_chat".equals(id)) return communityChatEnabled;
+        LOGGER.warn("[PlexMod] Unknown feature ID: {}", id);
+        return false;
     }
 
     public void setFeatureEnabled(String id, boolean val) {
-        switch (id) {
-            case "autogg":         autoGgEnabled        = val; break;
-            case "autogl":         autoGlEnabled        = val; break;
-            case "autotaunt":      autoTauntEnabled     = val; break;
-            case "autofriend":     autoFriendEnabled    = val; break;
-            case "discord_rpc":    discordRpcEnabled    = val; break;
-            case "chat_cycle":     chatCycleEnabled     = val; break;
-            case "nametag":        nametagEnabled       = val; break;
-            case "better_lobbies": betterLobbiesEnabled = val; break;
-            default: LOGGER.warn("[PlexMod] Unknown feature: {}", id); return;
-        }
+        if ("autogg".equals(id))         { autoGgEnabled        = val; }
+        else if ("autogl".equals(id))    { autoGlEnabled        = val; }
+        else if ("autotaunt".equals(id)) { autoTauntEnabled     = val; }
+        else if ("autofriend".equals(id)){ autoFriendEnabled    = val; }
+        else if ("discord_rpc".equals(id)){ discordRpcEnabled   = val; }
+        else if ("chat_cycle".equals(id)){ chatCycleEnabled     = val; }
+        else if ("nametag".equals(id))   { nametagEnabled       = val; }
+        else if ("player_tag".equals(id)){ playerTagEnabled     = val; }
+        else if ("better_lobbies".equals(id)){ betterLobbiesEnabled = val; }
+        else if ("scoreboard_red".equals(id)){ scoreboardRedEnabled = val; }
+        else if ("community_chat".equals(id)){ communityChatEnabled = val; }
+        else { LOGGER.warn("[PlexMod] Unknown feature ID: {}", id); return; }
         save();
     }
 
-    public String getAutoGgMessage()             { return autoGgMessage; }
-    public void   setAutoGgMessage(String msg)   { autoGgMessage = msg; }
-    public String getAutoGlMessage()             { return autoGlMessage; }
-    public void   setAutoGlMessage(String msg)   { autoGlMessage = msg; }
+    public NametagExtraTag getNametagExtraTag() {
+        try { return NametagExtraTag.valueOf(nametagExtraTag.toUpperCase()); }
+        catch (IllegalArgumentException e) { return NametagExtraTag.NONE; }
+    }
+
+    public void setNametagExtraTag(NametagExtraTag tag) {
+        this.nametagExtraTag = tag.name();
+        save();
+    }
+
+    public enum NametagExtraTag { NONE, LEVEL }
+
+    public String getAutoGgMessage()           { return autoGgMessage; }
+    public void   setAutoGgMessage(String m)   { autoGgMessage = m; save(); }
+    public String getAutoGlMessage()           { return autoGlMessage; }
+    public void   setAutoGlMessage(String m)   { autoGlMessage = m; save(); }
 
     private boolean bool(JsonObject j, String k, boolean def) { return j.has(k) ? j.get(k).getAsBoolean() : def; }
     private String  str (JsonObject j, String k, String  def) { return j.has(k) ? j.get(k).getAsString()  : def; }

@@ -4,7 +4,8 @@ public enum ChatChannel {
 
     ALL("All", null),
     PARTY("Party", "@ "),
-    TEAM("Team", "# ");
+    TEAM("Team", "# "),
+    COMMUNITY("Community", "!");
 
     public final String displayName;
     public final String prefix;
@@ -16,10 +17,11 @@ public enum ChatChannel {
 
     public boolean isAvailable(boolean inParty, boolean inTeamGame) {
         switch (this) {
-            case ALL:   return true;
-            case PARTY: return inParty;
-            case TEAM:  return inTeamGame;
-            default:    return false;
+            case ALL:       return true;
+            case PARTY:     return inParty;
+            case TEAM:      return inTeamGame;
+            case COMMUNITY: return false;
+            default:        return false;
         }
     }
 

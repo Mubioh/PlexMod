@@ -3,6 +3,7 @@ package me.mubioh.plexmod.client;
 import me.mubioh.plexmod.core.chat.ChatPatternEngine;
 import me.mubioh.plexmod.core.config.PlexConfig;
 import me.mubioh.plexmod.core.feature.PlexRegistry;
+import me.mubioh.plexmod.core.util.GameMetadataService;
 import me.mubioh.plexmod.feature.autofriend.AutoFriendFeature;
 import me.mubioh.plexmod.feature.autogg.AutoGGFeature;
 import me.mubioh.plexmod.feature.autogl.AutoGLFeature;
@@ -11,6 +12,7 @@ import me.mubioh.plexmod.feature.betterlobbies.BetterLobbiesFeature;
 import me.mubioh.plexmod.feature.chatcycle.ChatCycleFeature;
 import me.mubioh.plexmod.feature.discord.DiscordRPCFeature;
 import me.mubioh.plexmod.feature.nametag.NameTagFeature;
+import me.mubioh.plexmod.feature.nametag.PlayerTagFeature;
 import me.mubioh.plexmod.keybinds.KeybindManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -19,7 +21,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = PlexModClient.MODID, name = "PlexMod", version = "1.0.0", clientSideOnly = true)
+@Mod(modid = PlexModClient.MODID, name = "PlexMod", version = "1.1.2", clientSideOnly = true)
 public class PlexModClient {
 
     public static final String MODID  = "plexmod";
@@ -38,11 +40,15 @@ public class PlexModClient {
     public void init(FMLInitializationEvent event) {
         LOGGER.info("[PlexMod] Starting Mineplex Mod...");
 
+        // Kick off background API fetches early
+        GameMetadataService.getInstance();
+
         ChatPatternEngine.register();
 
         MinecraftForge.EVENT_BUS.register(KeybindManager.INSTANCE);
 
         PlexRegistry.register(new NameTagFeature());
+        PlexRegistry.register(new PlayerTagFeature());
         PlexRegistry.register(new DiscordRPCFeature());
         PlexRegistry.register(new AutoGLFeature());
         PlexRegistry.register(new AutoGGFeature());

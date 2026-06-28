@@ -14,28 +14,30 @@ import java.time.Instant;
 
 public class DiscordRPCFeature implements PlexFeature {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("PlexMod/DiscordRPC");
-    private static final long CLIENT_ID = 1501655277743771678L;
+    private static final Logger LOGGER    = LoggerFactory.getLogger("PlexMod/DiscordRPC");
+    private static final long   CLIENT_ID = 1501655277743771678L;
 
     private static final boolean DEV_MODE = false;
 
-    private Core core;
+    private Core   core;
     private Thread rpcThread;
     private volatile boolean running = false;
 
-    private volatile String lastDetails = null;
-    private volatile String lastState   = null;
+    private volatile String  lastDetails  = null;
+    private volatile String  lastState    = null;
     private volatile Instant sessionStart = null;
 
     @Override public String getId()          { return "discord_rpc"; }
     @Override public String getDisplayName() { return "Discord RPC"; }
     @Override public String getTooltip()     { return "Shows your current Mineplex game in Discord Rich Presence."; }
-    @Override public boolean isToggleable()  { return false; }
+    @Override public boolean isToggleable()  { return true; }   // ← now fully toggleable
 
     @Override
     public void onEnable() {
         running      = true;
         sessionStart = Instant.now();
+        lastDetails  = null;  // reset so first update always pushes
+        lastState    = null;
 
         rpcThread = new Thread(() -> {
             try (CreateParams params = new CreateParams()) {
@@ -46,16 +48,19 @@ public class DiscordRPCFeature implements PlexFeature {
                     this.core = core;
                     LOGGER.info("Discord Game SDK initialised.");
 
-                    while (running) {
-                        updateActivity(core);
-                        core.runCallbacks();
+                    // ← Force an immediate push on enable, don't wait 5s
+                    updateActivity(core);
+                    core.runCallbacks();
 
+                    while (running) {
                         try {
                             Thread.sleep(5000);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                             break;
                         }
+                        updateActivity(core);
+                        core.runCallbacks();
                     }
                 }
             } catch (Exception e) {

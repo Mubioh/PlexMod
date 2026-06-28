@@ -27,9 +27,10 @@ public class ChatChannelState {
 
     public boolean isMatch(String plainText) {
         return switch (channel) {
-            case ALL   -> true;
-            case PARTY -> isPartyMessage(plainText);
-            case TEAM  -> isTeamMessage(plainText);
+            case ALL       -> true;
+            case PARTY     -> isPartyMessage(plainText);
+            case TEAM      -> isTeamMessage(plainText);
+            case COMMUNITY -> false; // Community matching is Component-based; handled directly by CommunityChannel
         };
     }
 

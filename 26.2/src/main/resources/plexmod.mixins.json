@@ -14,7 +14,8 @@
     "PlayerTabOverlayAccessor",
     "ScoreboardScoreMixin",
     "SoundEngineMixin",
-    "TitleScreenMixin"
+    "TitleScreenMixin",
+    "EntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

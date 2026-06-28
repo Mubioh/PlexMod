@@ -29,33 +29,44 @@ public class DiscordRPCFeature implements PlexFeature {
     private Thread connectionThread;
     private Thread updateThread;
 
-    private volatile String lastDetails = null;
-    private OffsetDateTime sessionStart = null;
+    private volatile String  lastDetails  = null;
+    private volatile String  lastState    = null;
+    private OffsetDateTime   sessionStart = null;
 
     @Override public String  getId()          { return "discord_rpc"; }
     @Override public String  getDisplayName() { return "Discord RPC"; }
     @Override public String  getTooltip()     { return "Shows your current Mineplex game in Discord Rich Presence."; }
-    @Override public boolean isToggleable()   { return false; }
+    @Override public boolean isToggleable()   { return true; }
 
     @Override
     public void onEnable() {
         running.set(true);
+        lastDetails = null;
+        lastState   = null;
 
         updateThread = new Thread(new Runnable() {
             public void run() {
-                while (running.get()) {
-                    try {
-                        manageConnection();
-                        if (ready.get() && MineplexHelper.isOnMineplex()) {
-                            updatePresence();
-                        }
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    } catch (Exception e) {
-                        LOGGER.warn("[PlexMod] Discord loop error: {}", e.getMessage());
+                try {
+                    // Force an immediate push on enable
+                    manageConnection();
+                    if (ready.get() && MineplexHelper.isOnMineplex()) {
+                        updatePresence();
                     }
+                    while (running.get()) {
+                        Thread.sleep(5000);
+                        try {
+                            manageConnection();
+                            if (ready.get() && MineplexHelper.isOnMineplex()) {
+                                updatePresence();
+                            }
+                        } catch (Exception e) {
+                            LOGGER.warn("[PlexMod] Discord loop error: {}", e.getMessage());
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    LOGGER.warn("[PlexMod] Discord loop error: {}", e.getMessage());
                 }
             }
         }, "PlexMod-DiscordRPC");
@@ -74,12 +85,9 @@ public class DiscordRPCFeature implements PlexFeature {
 
     private void manageConnection() {
         if (!MineplexHelper.isOnMineplex()) {
-            if (isConnected()) {
-                closeConnection();
-            }
+            if (isConnected()) closeConnection();
             return;
         }
-
         if (isConnected()) return;
         ready.set(false);
 
@@ -94,7 +102,6 @@ public class DiscordRPCFeature implements PlexFeature {
         if (now < lastConnectionAttempt.get() + 8000L) return;
 
         lastConnectionAttempt.set(now);
-
         ipcClient = new IPCClient(CLIENT_ID);
         ipcClient.setListener(new IPCListener() {
             @Override
@@ -108,13 +115,9 @@ public class DiscordRPCFeature implements PlexFeature {
 
         connectionThread = new Thread(new Runnable() {
             public void run() {
-                try {
-                    ipcClient.connect(DiscordBuild.ANY);
-                } catch (Exception e) {
-                    LOGGER.debug("[PlexMod] Discord IPC connect failed: {}", e.getMessage());
-                } finally {
-                    connectionThread = null;
-                }
+                try { ipcClient.connect(DiscordBuild.ANY); }
+                catch (Exception e) { LOGGER.debug("[PlexMod] Discord IPC connect failed: {}", e.getMessage()); }
+                finally { connectionThread = null; }
             }
         }, "PlexMod-DiscordConnect");
         connectionThread.setDaemon(true);
@@ -126,15 +129,17 @@ public class DiscordRPCFeature implements PlexFeature {
         try {
             GameDetectorUtil.Detection det = GameDetectorUtil.detect();
             String details = det.isLobby() ? "In Lobby" : "Playing " + det.gameName();
+            String state   = "On Minecraft 1.8.9";
 
-            if (details.equals(lastDetails)) return;
+            if (details.equals(lastDetails) && state.equals(lastState)) return;
 
             sessionStart = OffsetDateTime.now();
             lastDetails  = details;
+            lastState    = state;
 
             RichPresence.Builder presence = new RichPresence.Builder();
             presence.setDetails(details);
-            presence.setState("On Minecraft 1.8.9");
+            presence.setState(state);
             presence.setLargeImage("mineplex", "mineplex.com");
             presence.setStartTimestamp(sessionStart);
 
@@ -147,16 +152,13 @@ public class DiscordRPCFeature implements PlexFeature {
     }
 
     private void closeConnection() {
-        try {
-            if (ipcClient != null) {
-                ipcClient.close();
-            }
-        } catch (Exception e) {
-            LOGGER.debug("[PlexMod] Error closing IPC: {}", e.getMessage());
-        } finally {
+        try { if (ipcClient != null) ipcClient.close(); }
+        catch (Exception e) { LOGGER.debug("[PlexMod] Error closing IPC: {}", e.getMessage()); }
+        finally {
             ipcClient = null;
             ready.set(false);
             lastDetails = null;
+            lastState   = null;
             lastConnectionAttempt.set(0L);
         }
     }

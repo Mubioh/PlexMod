@@ -3,6 +3,8 @@ package me.mubioh.plexmod.client;
 import me.mubioh.plexmod.core.chat.ChatPatternEngine;
 import me.mubioh.plexmod.core.config.PlexConfig;
 import me.mubioh.plexmod.core.feature.PlexRegistry;
+import me.mubioh.plexmod.core.util.GameMetadataService;
+import me.mubioh.plexmod.core.util.PlayerDataService;
 import me.mubioh.plexmod.feature.autofriend.AutoFriendFeature;
 import me.mubioh.plexmod.feature.autogg.AutoGGFeature;
 import me.mubioh.plexmod.feature.autogl.AutoGLFeature;
@@ -11,8 +13,13 @@ import me.mubioh.plexmod.feature.betterlobbies.BetterLobbiesFeature;
 import me.mubioh.plexmod.feature.chatcycle.ChatCycleFeature;
 import me.mubioh.plexmod.feature.discord.DiscordRPCFeature;
 import me.mubioh.plexmod.feature.nametag.NameTagFeature;
+import me.mubioh.plexmod.feature.nametag.PlayerTagFeature;
 import me.mubioh.plexmod.keybinds.KeybindManager;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +34,13 @@ public class PlexModClient implements ClientModInitializer {
         LOGGER.info("[PlexMod] Starting Mineplex Mod...");
 
         PlexConfig.getInstance();
-
+        GameMetadataService.getInstance();
         ChatPatternEngine.register();
         KeybindManager.register();
 
         PlexRegistry.register(new NameTagFeature());
+        PlexRegistry.register(new PlayerTagFeature());
         PlexRegistry.register(new DiscordRPCFeature());
-
         PlexRegistry.register(new AutoGLFeature());
         PlexRegistry.register(new AutoGGFeature());
         PlexRegistry.register(new AutoTauntFeature());
@@ -41,6 +48,11 @@ public class PlexModClient implements ClientModInitializer {
         PlexRegistry.register(new BetterLobbiesFeature());
 
         PlexRegistry.register(new ChatCycleFeature());
+
+        ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            ChatCycleFeature feature = ChatCycleFeature.getInstance();
+            if (feature != null) feature.onClientTick();
+        });
 
         LOGGER.info("[PlexMod] Mineplex Mod ready.");
     }

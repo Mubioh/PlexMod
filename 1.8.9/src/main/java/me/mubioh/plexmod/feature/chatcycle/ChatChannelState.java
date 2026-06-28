@@ -26,10 +26,11 @@ public class ChatChannelState {
 
     public boolean isMatch(String plain) {
         switch (channel) {
-            case ALL:   return true;
-            case PARTY: return plain.startsWith("PARTY ") || plain.startsWith("Party>");
-            case TEAM:  return plain.startsWith("TEAM ");
-            default:    return false;
+            case ALL:       return true;
+            case PARTY:     return plain.startsWith("PARTY ") || plain.startsWith("Party>");
+            case TEAM:      return plain.startsWith("TEAM ");
+            case COMMUNITY: return false; // Community matching handled by CommunityChannel
+            default:        return false;
         }
     }
 

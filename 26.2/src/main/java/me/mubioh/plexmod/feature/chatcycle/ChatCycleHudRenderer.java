@@ -1,6 +1,7 @@
 package me.mubioh.plexmod.feature.chatcycle;
 
 import me.mubioh.plexmod.core.chat.ChatChannel;
+import me.mubioh.plexmod.feature.community.CommunityChannel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jspecify.annotations.Nullable;
@@ -21,6 +22,12 @@ public class ChatCycleHudRenderer {
     private static final int COLOUR_INACTIVE_TEXT = 0xFFAAAAAA;
     private static final int COLOUR_PINNED_TEXT   = 0xFFFFAA00;
 
+    // Community tab colours
+    private static final int COLOUR_COMM_ACTIVE_TEXT   = 0xFF55FF55;  // green when active
+    private static final int COLOUR_COMM_INACTIVE_TEXT = 0xFF22AA22;
+    private static final int COLOUR_COMM_UNREAD_TEXT   = 0xFF00FF00;
+    private static final int COLOUR_COMM_PINNED_TEXT   = 0xFFFFAA00;
+
     private static final int COLOUR_DM_ACTIVE_TEXT   = 0xFFFFFFFF;
     private static final int COLOUR_DM_INACTIVE_TEXT = 0xFFAAAAAA;
     private static final int COLOUR_DM_UNREAD_TEXT   = 0xFF55FFFF;
@@ -33,27 +40,42 @@ public class ChatCycleHudRenderer {
                                   ChatChannel current, ChatChannel pinnedChannel,
                                   DmChannel currentDm, DmChannel pinnedDm,
                                   List<DmChannel> dmChannels,
-                                  boolean inParty, boolean inTeamGame,
+                                  CommunityChannel communityChannel,
+                                  boolean inParty, boolean inTeamGame, boolean inCommunity,
                                   int mouseX, int mouseY) {
         Minecraft mc = Minecraft.getInstance();
         int curX = x - 2;
 
         for (ChatChannel channel : ChatChannel.values()) {
-            if (!channel.isAvailable(inParty, inTeamGame)) continue;
+            boolean available = channel == ChatChannel.COMMUNITY
+                    ? inCommunity
+                    : channel.isAvailable(inParty, inTeamGame);
+            if (!available) continue;
 
-            String label  = channel.displayName;
-            int tabWidth  = mc.font.width(label) + TAB_PADDING_X * 2;
-
+            String label    = channel == ChatChannel.COMMUNITY && communityChannel != null
+                    ? communityChannel.getDisplayName()
+                    : channel.displayName;
+            int tabWidth    = mc.font.width(label) + TAB_PADDING_X * 2;
             boolean isActive = currentDm == null && channel == current;
             boolean isPinned = channel == pinnedChannel;
             boolean isHover  = isHovered(mouseX, mouseY, curX, y, tabWidth);
+            boolean hasUnread = channel == ChatChannel.COMMUNITY
+                    && communityChannel != null && communityChannel.hasUnread();
 
             int bg = isActive ? COLOUR_ACTIVE_BG : (isHover ? COLOUR_HOVER_BG : COLOUR_INACTIVE_BG);
             graphics.fill(curX, y, curX + tabWidth, y + TAB_HEIGHT, bg);
 
-            int textColour = isPinned ? COLOUR_PINNED_TEXT
-                    : isActive        ? COLOUR_ACTIVE_TEXT
-                    :                   COLOUR_INACTIVE_TEXT;
+            int textColour;
+            if (channel == ChatChannel.COMMUNITY) {
+                textColour = isPinned ? COLOUR_COMM_PINNED_TEXT
+                        : isActive   ? COLOUR_COMM_ACTIVE_TEXT
+                        : hasUnread  ? COLOUR_COMM_UNREAD_TEXT
+                        :              COLOUR_COMM_INACTIVE_TEXT;
+            } else {
+                textColour = isPinned ? COLOUR_PINNED_TEXT
+                        : isActive   ? COLOUR_ACTIVE_TEXT
+                        :              COLOUR_INACTIVE_TEXT;
+            }
 
             graphics.text(mc.font, label, curX + TAB_PADDING_X, y + (TAB_HEIGHT - 8) / 2, textColour);
             curX += tabWidth + TAB_GAP;
@@ -89,16 +111,25 @@ public class ChatCycleHudRenderer {
     }
 
     public static @Nullable ChatChannel getClickedFixedTab(int mouseX, int mouseY,
-                                                           int x, int y,
-                                                           boolean inParty, boolean inTeamGame) {
+                                                            int x, int y,
+                                                            boolean inParty, boolean inTeamGame,
+                                                            boolean inCommunity,
+                                                            CommunityChannel communityChannel) {
         if (mouseY < y || mouseY >= y + TAB_HEIGHT) return null;
 
         Minecraft mc = Minecraft.getInstance();
         int curX = x - 2;
 
         for (ChatChannel channel : ChatChannel.values()) {
-            if (!channel.isAvailable(inParty, inTeamGame)) continue;
-            int tabWidth = mc.font.width(channel.displayName) + TAB_PADDING_X * 2;
+            boolean available = channel == ChatChannel.COMMUNITY
+                    ? inCommunity
+                    : channel.isAvailable(inParty, inTeamGame);
+            if (!available) continue;
+
+            String label  = channel == ChatChannel.COMMUNITY && communityChannel != null
+                    ? communityChannel.getDisplayName()
+                    : channel.displayName;
+            int tabWidth = mc.font.width(label) + TAB_PADDING_X * 2;
             if (mouseX >= curX && mouseX < curX + tabWidth) return channel;
             curX += tabWidth + TAB_GAP;
         }
@@ -107,17 +138,25 @@ public class ChatCycleHudRenderer {
     }
 
     public static @Nullable DmChannel getClickedDmTab(int mouseX, int mouseY,
-                                                      int x, int y,
-                                                      boolean inParty, boolean inTeamGame,
-                                                      List<DmChannel> dmChannels) {
+                                                       int x, int y,
+                                                       boolean inParty, boolean inTeamGame,
+                                                       boolean inCommunity,
+                                                       CommunityChannel communityChannel,
+                                                       List<DmChannel> dmChannels) {
         if (mouseY < y || mouseY >= y + TAB_HEIGHT) return null;
 
         Minecraft mc = Minecraft.getInstance();
         int curX = x - 2;
 
         for (ChatChannel channel : ChatChannel.values()) {
-            if (!channel.isAvailable(inParty, inTeamGame)) continue;
-            curX += mc.font.width(channel.displayName) + TAB_PADDING_X * 2 + TAB_GAP;
+            boolean available = channel == ChatChannel.COMMUNITY
+                    ? inCommunity
+                    : channel.isAvailable(inParty, inTeamGame);
+            if (!available) continue;
+            String label = channel == ChatChannel.COMMUNITY && communityChannel != null
+                    ? communityChannel.getDisplayName()
+                    : channel.displayName;
+            curX += mc.font.width(label) + TAB_PADDING_X * 2 + TAB_GAP;
         }
 
         for (DmChannel dm : dmChannels) {

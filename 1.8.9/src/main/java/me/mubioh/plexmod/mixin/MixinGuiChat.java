@@ -4,6 +4,7 @@ import me.mubioh.plexmod.core.chat.ChatChannel;
 import me.mubioh.plexmod.feature.chatcycle.ChatCycleFeature;
 import me.mubioh.plexmod.feature.chatcycle.ChatCycleHudRenderer;
 import me.mubioh.plexmod.feature.chatcycle.DmChannel;
+import me.mubioh.plexmod.feature.community.CommunityChannel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiNewChat;
@@ -27,7 +28,7 @@ public class MixinGuiChat {
     @Shadow protected GuiTextField inputField;
 
     @Unique private long   plexmod$lastClickTime  = 0;
-    @Unique private Object plexmod$lastClickedTab = null;
+    @Unique private Object plexmod$lastClickedTab  = null;
     private static final long DOUBLE_CLICK_MS = 400;
 
     @Inject(method = "initGui", at = @At("TAIL"))
@@ -45,12 +46,14 @@ public class MixinGuiChat {
         ChatCycleFeature f = ChatCycleFeature.getInstance();
         if (f == null || inputField == null) return;
 
+        // Only intercept Tab when input is empty — never intercept arrow keys
         if (keyCode == Keyboard.KEY_TAB && inputField.getText().trim().isEmpty()) {
             f.cycle();
             ci.cancel();
             return;
         }
 
+        // Prefix injection on enter — don't cancel, just modify the text
         if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER) {
             String text = inputField.getText();
             if (!text.isEmpty() && !text.startsWith("/")) {
@@ -60,6 +63,7 @@ public class MixinGuiChat {
                     inputField.setText(f.getCurrentChannel().prefix + text);
                 }
             }
+            // do NOT cancel — let vanilla handle sending
         }
     }
 
@@ -72,7 +76,8 @@ public class MixinGuiChat {
         int tabX = inputField.xPosition;
 
         ChatChannel fixedClicked = ChatCycleHudRenderer.getClickedFixedTab(
-                mx, my, tabX, tabY, f.isInParty(), f.isInTeamGame());
+                mx, my, tabX, tabY,
+                f.isInParty(), f.isInTeamGamePublic(), f.isInCommunity());
         if (fixedClicked != null) {
             long now = System.currentTimeMillis();
             boolean dbl = fixedClicked.equals(plexmod$lastClickedTab)
@@ -84,8 +89,11 @@ public class MixinGuiChat {
             return;
         }
 
+        CommunityChannel commChannel = f.getCommunityChannel();
         DmChannel dmClicked = ChatCycleHudRenderer.getClickedDmTab(
-                mx, my, tabX, tabY, f.isInParty(), f.isInTeamGame(), f.getDmChannels());
+                mx, my, tabX, tabY,
+                f.isInParty(), f.isInTeamGamePublic(), f.isInCommunity(),
+                commChannel, f.getDmChannels());
         if (dmClicked != null) {
             long now = System.currentTimeMillis();
             boolean dbl = dmClicked.equals(plexmod$lastClickedTab)
@@ -103,12 +111,13 @@ public class MixinGuiChat {
         if (f == null || inputField == null) return;
 
         int tabY = inputField.yPosition - ChatCycleHudRenderer.TAB_HEIGHT - ChatCycleHudRenderer.TAB_GAP;
+        CommunityChannel commChannel = f.getCommunityChannel();
         ChatCycleHudRenderer.renderTabs(
                 inputField.xPosition, tabY,
                 f.getCurrentChannel(), f.getPinnedChannel(),
                 f.getCurrentDmChannel(), f.getPinnedDmChannel(),
-                f.getDmChannels(),
-                f.isInParty(), f.isInTeamGame(),
+                commChannel, f.getDmChannels(),
+                f.isInParty(), f.isInTeamGamePublic(), f.isInCommunity(),
                 mx, my
         );
     }
@@ -131,16 +140,26 @@ public class MixinGuiChat {
         if (f == null) { mc.ingameGUI.getChatGUI().refreshChat(); return; }
 
         GuiNewChat chat = mc.ingameGUI.getChatGUI();
+
+        // Save sent history before clearing — clearChatMessages wipes it
+        List<String> sentHistory = new ArrayList<String>(chat.getSentMessages());
+
         chat.clearChatMessages();
+
+        // Restore sent history so up/down arrow key cycling still works
+        for (String msg : sentHistory) {
+            chat.addToSentMessages(msg);
+        }
 
         List<IChatComponent> history;
         if (f.getCurrentDmChannel() != null) {
             history = f.getCurrentDmChannel().getHistory();
+        } else if (f.getCurrentChannel() == ChatChannel.COMMUNITY && f.getCommunityChannel() != null) {
+            history = f.getCommunityChannel().getHistory();
         } else {
             history = f.getCurrentState().getHistory();
         }
 
-        // History is newest-first; printChatMessage adds to top, so add oldest-first
         List<IChatComponent> reversed = new ArrayList<IChatComponent>(history);
         Collections.reverse(reversed);
 
@@ -149,5 +168,10 @@ public class MixinGuiChat {
             chat.printChatMessage(msg);
         }
         f.setRepopulating(false);
+
+        if (inputField != null) {
+            inputField.setFocused(true);
+            inputField.setCursorPositionEnd();
+        }
     }
 }
