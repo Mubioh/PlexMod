@@ -15,7 +15,6 @@ public class KeybindManager {
 
     private static final String CATEGORY = "key.category.mineplexmod";
 
-    /** K — opens the new custom HUD screen */
     public static KeyBinding openMenu;
 
     private KeybindManager() {}

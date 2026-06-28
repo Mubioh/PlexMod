@@ -15,11 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = RendererLivingEntity.class)
 public abstract class MixinRendererLivingEntity {
 
-    /**
-     * canRenderName controls whether a nametag is drawn above an entity.
-     * We force it true for the local player when in third-person (own nametag feature),
-     * and trigger a player-data request for level tags.
-     */
     @Inject(method = "canRenderName(Lnet/minecraft/entity/EntityLivingBase;)Z",
             at = @At("HEAD"), cancellable = true)
     private void plexmod$showOwnName(EntityLivingBase entity, CallbackInfoReturnable<Boolean> cir) {
@@ -27,13 +22,11 @@ public abstract class MixinRendererLivingEntity {
         EntityPlayerSP local = mc.thePlayer;
         if (local == null) return;
 
-        // Request level data for all players so level tags can render
         if (entity instanceof EntityPlayer) {
             String uuid = entity.getUniqueID().toString();
             PlayerDataService.getInstance().requestPlayer(uuid);
         }
 
-        // Own nametag feature
         if (!PlexConfig.getInstance().isFeatureEnabled("nametag")) return;
         if (entity != local) return;
 

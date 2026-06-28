@@ -40,7 +40,6 @@ public class PlexModClient {
     public void init(FMLInitializationEvent event) {
         LOGGER.info("[PlexMod] Starting Mineplex Mod...");
 
-        // Kick off background API fetches early
         GameMetadataService.getInstance();
 
         ChatPatternEngine.register();

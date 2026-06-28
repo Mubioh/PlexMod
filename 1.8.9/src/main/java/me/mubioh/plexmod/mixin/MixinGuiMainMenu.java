@@ -19,7 +19,6 @@ public abstract class MixinGuiMainMenu extends GuiScreen {
 
     @Inject(method = "initGui", at = @At("TAIL"))
     private void onInitGui(CallbackInfo ci) {
-        // Find the Multiplayer button (id = 1 in vanilla 1.8.9)
         GuiButton mpBtn = null;
         for (Object obj : this.buttonList) {
             if (obj instanceof GuiButton && ((GuiButton) obj).id == 1) {
@@ -29,7 +28,6 @@ public abstract class MixinGuiMainMenu extends GuiScreen {
         }
         if (mpBtn == null) return;
 
-        // Shrink it to half-width and add a sibling "Join Mineplex" button
         int gap   = 4;
         int half  = (mpBtn.width - gap) / 2;
         int origX = mpBtn.xPosition;

@@ -18,7 +18,6 @@ import java.util.Map;
 
 public class PlexHudScreen extends GuiScreen {
 
-    // ── colours ──────────────────────────────────────────────────────────
     private static final int C_BG         = 0xF0111317;
     private static final int C_SURFACE    = 0xFF161921;
     private static final int C_CARD       = 0xFF1A1D23;
@@ -36,7 +35,6 @@ public class PlexHudScreen extends GuiScreen {
     private static final int C_KNOB_OFF   = 0xFF666B7A;
     private static final int C_DIVIDER    = 0xFF1E2128;
 
-    // ── tooltips ─────────────────────────────────────────────────────────
     private static final Map<String, String> TOOLTIPS = new HashMap<>();
     static {
         TOOLTIPS.put("chat_cycle",     "Press Tab in chat to cycle between channels.");
@@ -51,7 +49,6 @@ public class PlexHudScreen extends GuiScreen {
         TOOLTIPS.put("scoreboard_red", "Hides red score numbers on the sidebar scoreboard.");
     }
 
-    // ── layout ───────────────────────────────────────────────────────────
     private static final int BASE_W   = 480;
     private static final int BASE_H   = 320;
     private static final int HEADER_H = 34;
@@ -68,7 +65,6 @@ public class PlexHudScreen extends GuiScreen {
     private static final int SEARCH_H = 16;
     private static final int SEARCH_W = 120;
 
-    // ── feature defs ─────────────────────────────────────────────────────
     private static class FeatureDef {
         final String id, label;
         final int cat;
@@ -100,7 +96,6 @@ public class PlexHudScreen extends GuiScreen {
 
     private static final String[] CAT_LABELS = {"All", "Chat", "Social", "Display"};
 
-    // ── runtime rows ─────────────────────────────────────────────────────
     private static class Row {
         final FeatureDef def;
         boolean      expanded = false;
@@ -108,7 +103,6 @@ public class PlexHudScreen extends GuiScreen {
         Row(FeatureDef d) { this.def = d; }
     }
 
-    // ── state ─────────────────────────────────────────────────────────────
     private final GuiScreen parent;
     private int panelX, panelY, panelW, panelH;
     private int contentAreaY, contentAreaH;
@@ -145,7 +139,6 @@ public class PlexHudScreen extends GuiScreen {
 
         String prevSearch = searchBox != null ? searchBox.getText() : "";
         int sW = Math.min(SEARCH_W, panelW / 3);
-        // text field sits inside our custom-drawn border, no background of its own
         searchBox = new GuiTextField(0, this.fontRendererObj,
                 panelX + PAD + 4,
                 panelY + (HEADER_H - SEARCH_H) / 2 + 4,
@@ -222,24 +215,19 @@ public class PlexHudScreen extends GuiScreen {
         renderContent(mx, my, drawPanelY, prog);
         renderFooter(drawPanelY, prog);
 
-        // ── search box ────────────────────────────────────────────────────
         if (searchBox != null) {
             int sW = Math.min(SEARCH_W, panelW / 3);
             int sx = panelX + PAD;
             int sy = drawPanelY + (HEADER_H - SEARCH_H) / 2;
 
-            // custom border + background
             drawRect(sx, sy, sx + sW, sy + SEARCH_H, applyAlpha(C_SURFACE, prog));
             drawBorder(sx, sy, sW, SEARCH_H,
                     applyAlpha(searchBox.isFocused() ? C_BORDER_FOC : C_BORDER, prog));
 
-            // animate Y position with panel slide
             searchBox.yPosition = sy + 4;
             searchBox.drawTextBox();
-            // restore to non-animated Y so initGui recalculates correctly on resize
             searchBox.yPosition = panelY + (HEADER_H - SEARCH_H) / 2 + 4;
 
-            // placeholder text when empty and not focused
             if (searchBox.getText().isEmpty() && !searchBox.isFocused()) {
                 this.fontRendererObj.drawString(searchPlaceholder,
                         sx + 4, sy + (SEARCH_H - 8) / 2,
@@ -247,7 +235,6 @@ public class PlexHudScreen extends GuiScreen {
             }
         }
 
-        // ── expanded message boxes ────────────────────────────────────────
         for (Row r : rows) {
             if (r.expanded && r.msgBox != null && r.msgBox.getVisible()) {
                 // draw a custom border around it first
@@ -271,7 +258,6 @@ public class PlexHudScreen extends GuiScreen {
         drawRect(panelX, py, panelX + panelW, py + HEADER_H, applyAlpha(C_SURFACE, alpha));
         drawRect(panelX, py + HEADER_H - 1, panelX + panelW, py + HEADER_H, applyAlpha(C_DIVIDER, alpha));
 
-        // ── category tabs — text only, no box ────────────────────────────
         int tx = panelX + PAD + Math.min(SEARCH_W, panelW / 3) + 8;
         int ty = py + (HEADER_H - TAB_H) / 2;
         for (int i = 0; i < CAT_LABELS.length; i++) {
@@ -288,7 +274,7 @@ public class PlexHudScreen extends GuiScreen {
             tx += tw + 4;
         }
 
-        // ── close button ──────────────────────────────────────────────────
+
         String xs = "x";
         int cx = panelX + panelW - PAD - this.fontRendererObj.getStringWidth(xs);
         int cy = py + (HEADER_H - 8) / 2;
@@ -439,7 +425,6 @@ public class PlexHudScreen extends GuiScreen {
         this.fontRendererObj.drawString(text, ttX + 4, ttY + (th - 8) / 2, C_TEXT);
     }
 
-    // ── input ─────────────────────────────────────────────────────────────
     @Override
     protected void mouseClicked(int mx, int my, int button) throws IOException {
         if (mx < panelX || mx > panelX + panelW || my < panelY || my > panelY + panelH) {
@@ -562,7 +547,6 @@ public class PlexHudScreen extends GuiScreen {
     @Override
     public boolean doesGuiPauseGame() { return false; }
 
-    // ── helpers ───────────────────────────────────────────────────────────
     private void toggle(String id) {
         PlexConfig cfg = PlexConfig.getInstance();
         if ("nametag_extra".equals(id)) {
@@ -595,7 +579,6 @@ public class PlexHudScreen extends GuiScreen {
                 PositionedSoundRecord.create(new ResourceLocation("gui.button.press"), 1.0f));
     }
 
-    // ── colour utils ──────────────────────────────────────────────────────
     private static int applyAlpha(int argb, float alpha) {
         int a = (int)(((argb >> 24) & 0xFF) * alpha);
         return (a << 24) | (argb & 0x00FFFFFF);

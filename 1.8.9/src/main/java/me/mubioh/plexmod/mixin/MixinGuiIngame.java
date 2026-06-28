@@ -50,7 +50,6 @@ public abstract class MixinGuiIngame extends Gui {
             }
         }
 
-        // Always measure width WITH numbers so the board never shrinks
         int width = fr.getStringWidth(objective.getDisplayName());
         for (Score score : scores) {
             ScorePlayerTeam team = scoreboard.getPlayersTeam(score.getPlayerName());

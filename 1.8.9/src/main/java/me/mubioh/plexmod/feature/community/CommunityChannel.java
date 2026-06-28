@@ -45,11 +45,6 @@ public class CommunityChannel {
         this.fmtMessageColor = message != null ? message : EnumChatFormatting.GREEN;
     }
 
-    /**
-     * Matches against the plain-text form of the message.
-     * In 1.8.9 we don't have a reliable sibling tree API, so we use plain-text prefix matching.
-     * Community chat format in Mineplex 1.8.9: "[CommunityName] PlayerName: message"
-     */
     public boolean isMatch(IChatComponent message) {
         if (message == null || communityName.isEmpty()) return false;
         return isMatch(message.getUnformattedText());
@@ -57,7 +52,6 @@ public class CommunityChannel {
 
     public boolean isMatch(String plainText) {
         if (plainText == null || plainText.trim().isEmpty() || communityName.isEmpty()) return false;
-        // Match "[CommunityName] " prefix
         return plainText.startsWith(communityName + " ")
                 || plainText.startsWith("[" + communityName + "]");
     }

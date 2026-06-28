@@ -21,7 +21,6 @@ public class ChatCycleHudRenderer {
     private static final int TEXT_INACTIVE = 0xAAAAAA;
     private static final int TEXT_PINNED   = 0xFFAA00;
 
-    // Community tab colours
     private static final int TEXT_COMM_ACTIVE   = 0x55FF55;
     private static final int TEXT_COMM_INACTIVE = 0x22AA22;
     private static final int TEXT_COMM_UNREAD   = 0x00FF00;

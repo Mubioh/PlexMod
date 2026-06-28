@@ -46,14 +46,12 @@ public class MixinGuiChat {
         ChatCycleFeature f = ChatCycleFeature.getInstance();
         if (f == null || inputField == null) return;
 
-        // Only intercept Tab when input is empty — never intercept arrow keys
         if (keyCode == Keyboard.KEY_TAB && inputField.getText().trim().isEmpty()) {
             f.cycle();
             ci.cancel();
             return;
         }
 
-        // Prefix injection on enter — don't cancel, just modify the text
         if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER) {
             String text = inputField.getText();
             if (!text.isEmpty() && !text.startsWith("/")) {
@@ -63,7 +61,6 @@ public class MixinGuiChat {
                     inputField.setText(f.getCurrentChannel().prefix + text);
                 }
             }
-            // do NOT cancel — let vanilla handle sending
         }
     }
 
@@ -141,12 +138,10 @@ public class MixinGuiChat {
 
         GuiNewChat chat = mc.ingameGUI.getChatGUI();
 
-        // Save sent history before clearing — clearChatMessages wipes it
         List<String> sentHistory = new ArrayList<String>(chat.getSentMessages());
 
         chat.clearChatMessages();
 
-        // Restore sent history so up/down arrow key cycling still works
         for (String msg : sentHistory) {
             chat.addToSentMessages(msg);
         }

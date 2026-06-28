@@ -38,18 +38,14 @@ public abstract class MixinRenderPlayer {
         int totalW = fr.getStringWidth(prefix + number);
         int color  = levelColor(data.level);
 
-        // Build labelY the same way the reference mod does —
-        // feet Y + full entity height + padding to clear the nametag stack
         double nametagBase = y + player.height + 0.5D;
 
-        // If scoreboard score is showing, vanilla pushes the name up one line
         net.minecraft.scoreboard.ScoreObjective obj =
                 player.getWorldScoreboard().getObjectiveInDisplaySlot(2);
         if (obj != null && distanceSq < 100.0D) {
             nametagBase += (double)(fr.FONT_HEIGHT * 1.15F * fontScale);
         }
 
-        // Our tag goes one more line above the name
         double labelY = nametagBase + (double)(fr.FONT_HEIGHT * 1.15F * fontScale);
 
         GlStateManager.pushMatrix();

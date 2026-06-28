@@ -108,7 +108,7 @@ public class ChatCycleFeature implements PlexFeature {
         if (mc.getCurrentServerData() != null) {
             serverIp = mc.getCurrentServerData().serverIP.toLowerCase(Locale.ROOT);
         }
-        boolean isMineplex = serverIp.contains("mineplex.com") || serverIp.contains("127.0.0.1");
+        boolean isMineplex = serverIp.contains("mineplex.com");
         if (isMineplex) {
             if (!hasFetchedThisSession) {
                 hasFetchedThisSession = true;

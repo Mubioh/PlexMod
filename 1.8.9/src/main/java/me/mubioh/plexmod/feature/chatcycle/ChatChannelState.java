@@ -29,7 +29,7 @@ public class ChatChannelState {
             case ALL:       return true;
             case PARTY:     return plain.startsWith("PARTY ") || plain.startsWith("Party>");
             case TEAM:      return plain.startsWith("TEAM ");
-            case COMMUNITY: return false; // Community matching handled by CommunityChannel
+            case COMMUNITY: return false;
             default:        return false;
         }
     }

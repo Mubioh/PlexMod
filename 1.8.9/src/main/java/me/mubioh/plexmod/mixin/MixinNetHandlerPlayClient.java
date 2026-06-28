@@ -25,7 +25,6 @@ public class MixinNetHandlerPlayClient {
 
     @Inject(method = "handleJoinGame", at = @At("TAIL"))
     private void plexmod$onJoinGame(S01PacketJoinGame packet, CallbackInfo ci) {
-        // Delay slightly so thePlayer is initialised before we use it
         Thread t = new Thread(new Runnable() {
             public void run() {
                 try { Thread.sleep(200); } catch (InterruptedException ignored) {}
@@ -57,7 +56,6 @@ public class MixinNetHandlerPlayClient {
             String server = readBCString(data, offset);
             EventBus.publish(new ServerSwitchEvent(server));
 
-            // On server switch, purge community state and reset session fetch
             ChatCycleFeature chatCycle = ChatCycleFeature.getInstance();
             if (chatCycle != null) {
                 chatCycle.purgeCommunityState();
