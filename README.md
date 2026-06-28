@@ -39,16 +39,6 @@ PlexMod is a client mod for Minecraft that adds a handful of QoL tweaks for Mine
 
 ---
 
-## Planned Updates
-
-| Feature | Status |
-|---|---|
-| **Chat Cycle Update** | Add community chat to Chat Cycle *(waiting for API)* |
-| **Level Tag** | View a player's level above their head *(waiting for API)* |
-| **Placement Tag** | View a player's leaderboard placement above their head *(waiting for API)* |
-
----
-
 ## Download
 
 Available on [Modrinth](https://modrinth.com/mod/plexmod).
