@@ -30,13 +30,13 @@ public class DiscordRPCFeature implements PlexFeature {
     @Override public String getId()          { return "discord_rpc"; }
     @Override public String getDisplayName() { return "Discord RPC"; }
     @Override public String getTooltip()     { return "Shows your current Mineplex game in Discord Rich Presence."; }
-    @Override public boolean isToggleable()  { return true; }   // ← now fully toggleable
+    @Override public boolean isToggleable()  { return true; }
 
     @Override
     public void onEnable() {
         running      = true;
         sessionStart = Instant.now();
-        lastDetails  = null;  // reset so first update always pushes
+        lastDetails  = null;
         lastState    = null;
 
         rpcThread = new Thread(() -> {
@@ -48,7 +48,6 @@ public class DiscordRPCFeature implements PlexFeature {
                     this.core = core;
                     LOGGER.info("Discord Game SDK initialised.");
 
-                    // ← Force an immediate push on enable, don't wait 5s
                     updateActivity(core);
                     core.runCallbacks();
 

@@ -6,6 +6,7 @@ import me.mubioh.plexmod.core.event.PartyJoinEvent;
 import me.mubioh.plexmod.core.event.PartyLeaveEvent;
 import me.mubioh.plexmod.core.feature.PlexFeature;
 import me.mubioh.plexmod.core.util.GameDetectorUtil;
+import me.mubioh.plexmod.core.util.MineplexHelper;
 import me.mubioh.plexmod.feature.community.CommunityChannel;
 import me.mubioh.plexmod.feature.community.CommunityService;
 import net.minecraft.client.Minecraft;
@@ -92,17 +93,9 @@ public class ChatCycleFeature implements PlexFeature {
     }
 
     public void onServerJoin(String uuid) {
-        Minecraft mc = Minecraft.getInstance();
         if (uuid == null) return;
 
-        String serverIp = "";
-        if (mc.getCurrentServer() != null) {
-            serverIp = mc.getCurrentServer().ip.toLowerCase(Locale.ROOT);
-        } else if (mc.getConnection() != null && mc.getConnection().getConnection() != null) {
-            serverIp = mc.getConnection().getConnection().getRemoteAddress().toString().toLowerCase(Locale.ROOT);
-        }
-
-        if (serverIp.contains("mineplex.com")) {
+        if (MineplexHelper.isOnMineplex()) {
             if (!hasFetchedThisSession) {
                 hasFetchedThisSession = true;
                 LOGGER.info("[PlexMod] Querying Mineplex API for player community data...");

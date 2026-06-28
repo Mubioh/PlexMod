@@ -19,7 +19,6 @@ import java.util.List;
 
 public class PlexHudScreen extends Screen {
 
-    // ── colours ───────────────────────────────────────────────────────────
     private static final int C_BG         = 0xF0111317;
     private static final int C_SURFACE    = 0xFF161921;
     private static final int C_CARD       = 0xFF1A1D23;
@@ -37,7 +36,6 @@ public class PlexHudScreen extends Screen {
     private static final int C_KNOB_OFF   = 0xFF666B7A;
     private static final int C_DIVIDER    = 0xFF1E2128;
 
-    // ── tooltips ──────────────────────────────────────────────────────────
     private static final java.util.Map<String, String> TOOLTIPS = new java.util.HashMap<>();
     static {
         TOOLTIPS.put("chat_cycle",     "Press Tab in chat to cycle between channels.");
@@ -52,7 +50,6 @@ public class PlexHudScreen extends Screen {
         TOOLTIPS.put("scoreboard_red", "Hides red score numbers on the sidebar scoreboard.");
     }
 
-    // ── base layout ───────────────────────────────────────────────────────
     private static final int BASE_W   = 480;
     private static final int BASE_H   = 320;
     private static final int HEADER_H = 34;
@@ -69,16 +66,12 @@ public class PlexHudScreen extends Screen {
     private static final int SEARCH_H = 16;
     private static final int SEARCH_W = 120;
 
-    // search box inner padding (indent from custom border edge)
     private static final int SEARCH_INNER_PAD = 3;
-    // message box inner padding
     private static final int MSG_INNER_PAD    = 3;
 
-    // ── animation ─────────────────────────────────────────────────────────
     private static final float ANIM_DURATION = 180f; // ms
     private long  openTime = -1;
 
-    // ── feature data ──────────────────────────────────────────────────────
     private record FeatureDef(String id, String label, int cat,
                               boolean hasExpand, String expandKey, String expandHint) {}
 
@@ -102,7 +95,6 @@ public class PlexHudScreen extends Screen {
 
     private static final String[] CAT_LABELS = {"All", "Chat", "Social", "Display"};
 
-    // ── runtime row ───────────────────────────────────────────────────────
     private static class Row {
         final FeatureDef def;
         boolean expanded = false;
@@ -110,7 +102,6 @@ public class PlexHudScreen extends Screen {
         Row(FeatureDef d) { this.def = d; }
     }
 
-    // ── state ─────────────────────────────────────────────────────────────
     private final Screen    parent;
     private int             panelX, panelY, panelW, panelH;
     private int             contentAreaY, contentAreaH;
@@ -128,7 +119,6 @@ public class PlexHudScreen extends Screen {
         this.parent = parent;
     }
 
-    // ── init ──────────────────────────────────────────────────────────────
     @Override
     protected void init() {
         int margin = 16;
@@ -145,18 +135,13 @@ public class PlexHudScreen extends Screen {
 
         String prevSearch = searchBox != null ? searchBox.getValue() : "";
 
-        // The custom border box spans: x=[sx-1 .. sx+sw+1], y=[sy-1 .. sy+SEARCH_H+1]
-        // We want the EditBox text vertically centred inside that box.
-        // EditBox (unbordered) renders text at its own y+1.
-        // Box centre y = sy + SEARCH_H/2.  Text centre needs: editY + 1 + 4 = box centre
-        // => editY = sy + SEARCH_H/2 - 5
         int sw   = Math.min(SEARCH_W, panelW / 3);
         int sy   = panelY + (HEADER_H - SEARCH_H) / 2;
-        int editH = 10; // just needs to be >= font height (8)
+        int editH = 10;
         int editY = sy + 4;
 
         searchBox = new EditBox(this.font,
-                panelX + PAD + SEARCH_INNER_PAD,   // indent text from left border
+                panelX + PAD + SEARCH_INNER_PAD,
                 editY,
                 sw - SEARCH_INNER_PAD * 2,
                 editH,
@@ -174,7 +159,6 @@ public class PlexHudScreen extends Screen {
         rebuildRows();
     }
 
-    // ── row building ──────────────────────────────────────────────────────
     private void rebuildRows() {
         for (Row r : rows) if (r.msgBox != null) this.removeWidget(r.msgBox);
         rows.clear();
@@ -215,7 +199,6 @@ public class PlexHudScreen extends Screen {
         return h;
     }
 
-    // ── animation easing ──────────────────────────────────────────────────
     private static float easeOutCubic(float t) {
         float f = 1f - t;
         return 1f - f * f * f;
@@ -227,7 +210,6 @@ public class PlexHudScreen extends Screen {
         return Math.min(1f, elapsed / ANIM_DURATION);
     }
 
-    // ── render ────────────────────────────────────────────────────────────
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float delta) {
         float prog   = easeOutCubic(getAnimProg());
@@ -249,7 +231,6 @@ public class PlexHudScreen extends Screen {
         renderContent(g, mx, my, drawPanelY, alpha);
         renderFooter(g, drawPanelY, alpha);
 
-        // ── search box ────────────────────────────────────────────────────
         int sw = Math.min(SEARCH_W, panelW / 3);
         int sx = panelX + PAD;
         int sy = drawPanelY + (HEADER_H - SEARCH_H) / 2;
@@ -263,7 +244,6 @@ public class PlexHudScreen extends Screen {
         searchBox.setWidth(sw - SEARCH_INNER_PAD * 2);
         searchBox.extractRenderState(g, mx, my, delta);
 
-        // ── message boxes ─────────────────────────────────────────────────
         for (Row r : rows) {
             if (r.expanded && r.msgBox != null && r.msgBox.isVisible()) {
                 r.msgBox.extractRenderState(g, mx, my, delta);
@@ -354,7 +334,6 @@ public class PlexHudScreen extends Screen {
                 }
             }
 
-            // expand panel
             if (row.expanded && row.def.hasExpand()) {
                 int ey = cellY + ROW_H;
                 if (ey < areaY + areaH) {
@@ -441,7 +420,6 @@ public class PlexHudScreen extends Screen {
         g.text(this.font, text, tx + 4, ttY + (th - 8) / 2, C_TEXT);
     }
 
-    // ── input ─────────────────────────────────────────────────────────────
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         int mx = (int) event.x();
@@ -488,7 +466,6 @@ public class PlexHudScreen extends Screen {
         int grpStart = 0;
 
         for (int i = 0; i < rows.size(); i++) {
-            // at the start of each group, precompute max height across all COLS in this group
             if (col == 0) {
                 grpH = 0;
                 for (int j = i; j < Math.min(i + COLS, rows.size()); j++) {
@@ -560,7 +537,6 @@ public class PlexHudScreen extends Screen {
     @Override
     public boolean isPauseScreen() { return false; }
 
-    // ── helpers ───────────────────────────────────────────────────────────
     private void toggle(String id) {
         PlexConfig cfg = PlexConfig.getInstance();
         if (id.equals("nametag_extra")) {
@@ -598,7 +574,6 @@ public class PlexHudScreen extends Screen {
                 SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
     }
 
-    // ── colour utilities ──────────────────────────────────────────────────
     private static int applyAlpha(int argb, float alpha) {
         int a = (int)(((argb >> 24) & 0xFF) * alpha);
         return (a << 24) | (argb & 0x00FFFFFF);

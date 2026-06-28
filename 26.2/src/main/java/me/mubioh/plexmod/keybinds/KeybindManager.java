@@ -16,7 +16,6 @@ public class KeybindManager {
     private static final KeyMapping.Category CATEGORY =
             KeyMapping.Category.register(Identifier.parse("mineplexmod"));
 
-    /** K — opens the new custom HUD screen */
     public static KeyMapping openMenu;
 
     public static void register() {

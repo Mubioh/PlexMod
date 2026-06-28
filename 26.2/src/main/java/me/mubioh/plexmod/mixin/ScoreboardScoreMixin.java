@@ -23,7 +23,6 @@ public class ScoreboardScoreMixin {
                                       Component text, int x, int y, int color, boolean shadow) {
         String plain = text.getString().trim();
 
-        // If the text is a raw number and the scoreboard-red toggle is off, suppress it
         if (plain.matches("-?\\d+") && !PlexConfig.getInstance().isFeatureEnabled("scoreboard_red")) {
             return;
         }

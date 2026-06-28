@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState> {
 
-    // Shows the local player's own nametag when in third-person view.
     @Inject(
             method = "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z",
             at = @At("HEAD"),

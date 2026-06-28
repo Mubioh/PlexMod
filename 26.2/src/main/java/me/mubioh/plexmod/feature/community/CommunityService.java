@@ -145,7 +145,6 @@ public class CommunityService {
 
     private static ChatFormatting parseColor(String value, ChatFormatting fallback) {
         if (value == null || value.isBlank()) return fallback;
-        // API returns § colour codes (e.g. "§9") rather than names (e.g. "BLUE")
         if (value.startsWith("§") && value.length() == 2) {
             ChatFormatting fmt = ChatFormatting.getByCode(value.charAt(1));
             return fmt != null ? fmt : fallback;

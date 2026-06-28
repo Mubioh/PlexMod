@@ -5,7 +5,7 @@ public enum ChatChannel {
     ALL      ("All",       null,  true),
     PARTY    ("Party",     "@ ",  false),
     TEAM     ("Team",      "# ",  false),
-    COMMUNITY("Community", "!",  false);  // available only when the player is in a community
+    COMMUNITY("Community", "!",  false);
 
     public final String displayName;
     public final String prefix;
