@@ -13,7 +13,7 @@ PlexMod is a client mod for Minecraft that adds a handful of QoL tweaks for Mine
 
 **Supports:**
 - Forge 1.8.9
-- Fabric 26.1.2 (Latest)
+- Fabric 26.2 (Latest)
 
 **Maintenance:**
 - **Active Support:** Forge 1.8.9 and the latest Minecraft release receive all new features and updates.
@@ -32,7 +32,10 @@ PlexMod is a client mod for Minecraft that adds a handful of QoL tweaks for Mine
 | **AutoFriend** | Automatically accepts all incoming friend requests |
 | **Discord Presence** | Displays your current game on Discord |
 | **Cleaner Lobbies** | Removes portal sounds and boss bars in the hub |
-| **Chat Cycle** | Cycles between Party, Team, and Private Message chat |
+| **Nametag** | See your own nametag in third-person view |
+| **Level Tags** | Shows player levels above nametags, colour-coded by rank |
+| **Chat Cycle** | Cycles between All, Party, Team, Community, and DM chat channels |
+| **Hide Red Scores** | Option to hide red score numbers on the sidebar scoreboard |
 
 ---
 
